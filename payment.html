@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Credit Card Form | CodeWorks4U</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
+  <link rel="stylesheet" href="./style.css">
+  <style>
+    
+  </style>
+</head>
+<body>
+  <div class="wrapper" id="app">
+    <div class="card-form">
+      <div class="card-list">
+        <div class="card-item" v-bind:class="{ '-active' : isCardFlipped }">
+          <!-- Card Front -->
+          <div class="card-item__side -front">
+            <!-- Card Focus Element -->
+            <div class="card-item__focus" v-bind:class="{'-active' : focusElementStyle }" v-bind:style="focusElementStyle" ref="focusElement"></div>
+            <!-- Card Background Image -->
+            <div class="card-item__cover">
+              <img v-bind:src="'https://raw.githubusercontent.com/muhammederdem/credit-card-form/master/src/assets/images/' + currentCardBackground + '.jpeg'" class="card-item__bg">
+            </div>
+            <!-- Card Chip -->
+            <img src="https://raw.githubusercontent.com/muhammederdem/credit-card-form/master/src/assets/images/chip.png" class="card-item__chip">
+            <!-- Card Type Icon -->
+            <div class="card-item__type">
+              <transition name="slide-fade-up">
+                <img v-bind:src="'https://raw.githubusercontent.com/muhammederdem/credit-card-form/master/src/assets/images/' + getCardType + '.png'" v-if="getCardType" v-bind:key="getCardType" alt="" class="card-item__typeImg">
+              </transition>
+            </div>
+            <!-- Card Number -->
+            <label for="cardNumber" class="card-item__number" ref="cardNumber">
+              <template v-if="getCardType === 'amex'">
+                <span v-for="(n, $index) in amexCardMask" :key="$index">
+                  <transition name="slide-fade-up">
+                    <div class="card-item__numberItem" v-if="$index > 4 && $index < 14 && cardNumber.length > $index && n.trim() !== ''">*</div>
+                    <div class="card-item__numberItem" :class="{ '-active' : n.trim() === '' }" :key="$index" v-else-if="cardNumber.length > $index">
+                      {{cardNumber[$index]}}
+                    </div>
+                    <div class="card-item__numberItem" :class="{ '-active' : n.trim() === '' }" v-else :key="$index + 1">{{n}}</div>
+                  </transition>
+                </span>
+              </template>
+              <template v-else>
+                <span v-for="(n, $index) in otherCardMask" :key="$index">
+                  <transition name="slide-fade-up">
+                    <div class="card-item__numberItem" v-if="$index > 4 && $index < 15 && cardNumber.length > $index && n.trim() !== ''">*</div>
+                    <div class="card-item__numberItem" :class="{ '-active' : n.trim() === '' }" :key="$index" v-else-if="cardNumber.length > $index">
+                      {{cardNumber[$index]}}
+                    </div>
+                    <div class="card-item__numberItem" :class="{ '-active' : n.trim() === '' }" v-else :key="$index + 1">{{n}}</div>
+                  </transition>
+                </span>
+              </template>
+            </label>
+            <!-- Card Holder Name -->
+            <div class="card-item__content">
+              <label for="cardName" class="card-item__info" ref="cardName">
+                <div class="card-item__holder">Card Holder</div>
+                <transition name="slide-fade-up">
+                  <div class="card-item__name" v-if="cardName.length" key="1">
+                    <transition-group name="slide-fade-right">
+                      <span class="card-item__nameItem" v-for="(n, $index) in cardName.replace(/\s\s+/g, ' ')" v-if="$index === $index" v-bind:key="$index + 1">{{n}}</span>
+                    </transition-group>
+                  </div>
+                  <div class="card-item__name" v-else key="2">Full Name</div>
+                </transition>
+              </label>
+              <!-- Expiry Date -->
+              <label for="cardDate" class="card-item__info" ref="cardDate">
+                <div class="card-item__dateTitle">Expires</div>
+                <transition name="slide-fade-up">
+                  <div class="card-item__date" v-if="cardMonth.length && cardYear.length" v-bind:key="cardMonth + cardYear" class="card-item__dateItem">
+                    <span>{{cardMonth}}</span>
+                    <span>/</span>
+                    <span>{{cardYear.slice(2,4)}}</span>
+                  </div>
+                  <div class="card-item__date" v-else key="2">MM/YY</div>
+                </transition>
+              </label>
+            </div>
+          </div>
+          <!-- Card Back -->
+          <div class="card-item__side -back">
+            <div class="card-item__cover">
+              <img src="https://raw.githubusercontent.com/muhammederdem/credit-card-form/master/src/assets/images/card-bg.jpeg" class="card-item__bg">
+            </div>
+            <div class="card-item__band"></div>
+            <div class="card-item__cvv">
+              <div class="card-item__cvvTitle">CVV</div>
+              <div class="card-item__cvvBand">
+                <span v-for="(n, $index) in cardCvv" :key="$index">
+                  *
+                </span>
+              </div>
+              <div class="card-item__type">
+                <img src="https://raw.githubusercontent.com/muhammederdem/credit-card-form/master/src/assets/images/visa.png" class="card-item__typeImg">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <button class="card-form__button" @click="toggleCard">
+        <span>Flip Card</span>
+      </button>
+    </div>
+    <div class="card-form__inner">
+      <div class="card-input">
+        <label for="cardNumber" class="card-input__label">Card Number</label>
+        <input type="tel" class="card-input__input" v-mask="getCardType === 'amex' ? amexCardMask : otherCardMask" v-model="cardNumber" v-on:focus="focusInput('cardNumber')" ref="cardNumberInput" maxlength="19" id="cardNumber">
+      </div>
+      <div class="card-input">
+        <label for="cardName" class="card-input__label">Card Holder</label>
+        <input type="text" class="card-input__input" v-model="cardName" v-on:focus="focusInput('cardName')" ref="cardNameInput" id="cardName">
+      </div>
+      <div class="card-form__row">
+        <div class="card-form__col">
+          <label for="cardMonth" class="card-input__label">Expiration Date</label>
+          <input type="tel" class="card-input__input -short" v-mask="['MM', 'YY']" v-model="cardMonth" v-on:focus="focusInput('cardDate')" ref="cardDateInput" id="cardMonth" maxlength="2">
+          <span class="card-input__slash">/</span>
+          <input type="tel" class="card-input__input -short" v-model="cardYear" v-on:focus="focusInput('cardDate')" maxlength="2" id="cardYear">
+        </div>
+        <div class="card-form__col -cvv">
+          <label for="cardCvv" class="card-input__label">CVV</label>
+          <input type="tel" class="card-input__input" v-model="cardCvv" v-on:focus="focusInput('cardCvv')" maxlength="4" ref="cardCvvInput" id="cardCvv">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Include Vue.js -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+  <!-- Include VueMask plugin for input masking -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/v-mask/2.2.4/v-mask.min.js"></script>
+  <!-- Include the Vue.js logic for the card flipping animation -->
+  <script>
+    const app = new Vue({
+      el: '#app',
+      data: {
+        cardNumber: '',
+        cardName: '',
+        cardMonth: '',
+        cardYear: '',
+        cardCvv: '',
+        isCardFlipped: false,
+        focusElementStyle: null,
+        amexCardMask: ['####', '####', '####', '####'],
+        otherCardMask: ['####', '####', '####', '####']
+      },
+      computed: {
+        getCardType() {
+          if (this.cardNumber.charAt(0) === '4') {
+            return 'visa';
+          } else if (this.cardNumber.charAt(0) === '5') {
+            return 'mastercard';
+          } else if (this.cardNumber.charAt(0) === '3') {
+            return 'amex';
+          } else if (this.cardNumber.charAt(0) === '6') {
+            return 'discover';
+          } else {
+            return '';
+          }
+        },
+        currentCardBackground() {
+          if (this.getCardType === 'visa') {
+            return 'bg-v';
+          } else if (this.getCardType === 'mastercard') {
+            return 'bg-mc';
+          } else if (this.getCardType === 'amex') {
+            return 'bg-a';
+          } else if (this.getCardType === 'discover') {
+            return 'bg-d';
+          } else {
+            return 'bg-v';
+          }
+        }
+      },
+      methods: {
+        focusInput(inputName) {
+          const field = this.$refs[inputName];
+          this.focusElementStyle = {
+            width: `${field.offsetWidth}px`,
+            height: `${field.offsetHeight}px`,
+            transform: `translateX(${field.offsetLeft}px) translateY(${field.offsetTop}px)`
+          };
+        },
+        toggleCard() {
+          this.isCardFlipped = !this.isCardFlipped;
+        }
+      }
+    });
+  </script>
+</body>
+</html>

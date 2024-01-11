@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Payment Gateway Integration</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container mt-5">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="text-center">Payment Gateway Integration</h3>
+          </div>
+          <div class="card-body">
+            <form id="paymentForm">
+              <div class="form-group">
+                <label for="amount">Amount (USD)</label>
+                <input type="number" class="form-control" id="amount" required>
+              </div>
+              <button type="submit" class="btn btn-primary btn-block">Pay Now</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      $("#paymentForm").submit(function(e) {
+        e.preventDefault();
+        const amount = $("#amount").val();
+        processPayment(amount);
+      });
+
+      function processPayment(amount) {
+        // Simulate a server-side API call
+        // Replace this with actual server-side code that communicates with the payment gateway
+        setTimeout(function() {
+          const isSuccess = Math.random() < 0.8; // Simulate 80% success rate
+          if (isSuccess) {
+            alert("Payment successful!");
+            // Perform any necessary post-payment actions here (e.g., redirect, update order status, etc.)
+          } else {
+            alert("Payment failed. Please try again.");
+          }
+        }, 2000); // Simulate a 2-second API call
+      }
+    });
+  </script>
+</body>
+</html>
